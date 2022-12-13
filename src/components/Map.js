@@ -1,16 +1,43 @@
+import { useState } from "react";
 import GoogleMapReact from "google-map-react";
+import LocationMarker from "./LocationMarker";
+import LocationInfoBox from "./LocationInfoBox";
 
-const Map = ({ center, zoom }) => {
+const Map = ({ eventData, center, zoom }) => {
+  const [locationInfo, setLocationInfo] = useState(null);
+
+  const fireMarkers = eventData.map((ev) => {
+    if (ev.categories[0].id === "wildfires") {
+      // console.log(ev.geometry);
+      return (
+        <LocationMarker
+          key={ev.id}
+          lat={ev.geometry[0].coordinates[1]}
+          lng={ev.geometry[0].coordinates[0]}
+          onClick={() =>
+            setLocationInfo({
+              id: ev.id,
+              type: ev.categories[0].title.slice(0, -1),
+              title: ev.title,
+              source: ev.sources[0].url,
+            })
+          }
+        />
+      );
+    }
+    return null;
+  });
+
   return (
     <div className="map">
       <GoogleMapReact
-        bootstrapURLKeys={{ key: "AIzaSyDeivyDasdF1CfQjoF78g3-Qg7xrogf93A" }}
+        bootstrapURLKeys={{ key: process.env.REACT_APP_API_KEY }}
         defaultCenter={center}
         defaultZoom={zoom}
       >
-        {/* {markers} */}
+        {fireMarkers}
       </GoogleMapReact>
-      {/* {locationInfo && <LocationInfoBox info={locationInfo} />} */}
+      {locationInfo && <LocationInfoBox info={locationInfo} />}
     </div>
   );
 };
